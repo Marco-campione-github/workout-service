@@ -42,9 +42,9 @@ class RestGateway(
     }
 
     @GetMapping("exercise")
-    fun getAllExercises(): List<ExerciseResponse> {
+    fun getAllExercises(@RequestParam(required = false) limit: Int?): List<ExerciseResponse> {
         logger.info { "Received GET request for all exercises" }
-        return exerciseService.getAllExercises().map { it.toResponse() }
+        return exerciseService.getAllExercises(limit).map { it.toResponse() }
     }
 
     @PostMapping("exercise")
@@ -61,9 +61,9 @@ class RestGateway(
     }
 
     @GetMapping("plan")
-    fun getAllPlans(): List<WorkoutPlanResponse> {
+    fun getAllPlans(@RequestParam(required = false) limit: Int?): List<WorkoutPlanResponse> {
         logger.info { "Received GET request for all workout plans" }
-        return workoutPlanService.getAllWorkoutPlans().map { it.toResponse() }
+        return workoutPlanService.getAllWorkoutPlans(limit).map { it.toResponse() }
     }
 
     @PostMapping("plan")

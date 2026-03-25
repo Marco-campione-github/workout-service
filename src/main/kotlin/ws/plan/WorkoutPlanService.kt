@@ -3,6 +3,7 @@ package org.workout.ws.plan
 import org.springframework.stereotype.Service
 import org.workout.ws.api.model.CreateWorkoutPlanRequest
 import org.workout.ws.api.model.UpdateWorkoutPlanRequest
+import org.workout.ws.user.User
 import java.time.Instant
 import kotlin.jvm.optionals.getOrNull
 
@@ -32,8 +33,10 @@ class WorkoutPlanService(
     fun getWorkoutPlanById(id: String): WorkoutPlan? =
         workoutPlanDao.findById(id).getOrNull()
 
-    fun getAllWorkoutPlans(): List<WorkoutPlan> =
-        workoutPlanDao.findAll()
+    fun getAllWorkoutPlans(limit: Int?): List<WorkoutPlan> {
+        val all = workoutPlanDao.findAll()
+        return limit?.let { all.take(it.coerceIn(1, 200)) } ?: all
+    }
 
     fun updateWorkoutPlan(id: String, req: UpdateWorkoutPlanRequest): WorkoutPlan {
         val existing = workoutPlanDao.findById(id).orElseThrow {

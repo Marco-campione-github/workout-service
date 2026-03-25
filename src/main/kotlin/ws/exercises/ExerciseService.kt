@@ -11,8 +11,10 @@ class ExerciseService(
     fun getExerciseById(id: String): Exercise? =
         exerciseDao.findById(id).getOrNull()
 
-    fun getAllExercises(): List<Exercise> =
-        exerciseDao.findAll().toList()
+    fun getAllExercises(limit: Int?): List<Exercise> {
+        val all = exerciseDao.findAll()
+        return limit?.let { all.take(it.coerceIn(1, 200)) } ?: all
+    }
 
     fun createExercise(exerciseRequest: ApiExerciseRequest): Exercise {
         val exercise = Exercise(
