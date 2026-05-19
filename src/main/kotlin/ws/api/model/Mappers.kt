@@ -3,6 +3,8 @@ package org.workout.ws.api.model
 import org.workout.ws.exercises.Exercise
 import org.workout.ws.plan.WorkoutPlan
 import org.workout.ws.plan.WorkoutPlanItem
+import org.workout.ws.session.WorkoutSession
+import org.workout.ws.session.SessionExercise
 import org.workout.ws.user.User
 
 fun Exercise.toResponse(): ExerciseResponse =
@@ -53,5 +55,31 @@ fun WorkoutPlanItem.toResponse(): WorkoutPlanItemResponse =
         sets = this.sets,
         reps = this.reps,
         restTimeSeconds = this.restTimeSeconds,
+        notes = this.notes,
+    )
+
+fun WorkoutSession.toResponse(): WorkoutSessionResponse =
+    WorkoutSessionResponse(
+        id = requireNotNull(this.id) { "Workout session id is null (not saved?)" },
+        userId = this.userId,
+        workoutPlanId = this.workoutPlanId,
+        startedAt = this.startedAt.toString(),
+        completedAt = this.completedAt?.toString(),
+        sessionExercises = this.sessionExercises.map { it.toResponse() },
+        notes = this.notes,
+        completed = this.completed,
+        createdAt = this.createdAt.toString(),
+        updatedAt = this.updatedAt.toString()
+    )
+
+fun SessionExercise.toResponse(): SessionExerciseResponse =
+    SessionExerciseResponse(
+        exerciseId = this.exerciseId,
+        plannedSets = this.plannedSets,
+        plannedReps = this.plannedReps,
+        actualSets = this.actualSets,
+        actualReps = this.actualReps,
+        weightUsed = this.weightUsed,
+        difficulty = this.difficulty,
         notes = this.notes,
     )

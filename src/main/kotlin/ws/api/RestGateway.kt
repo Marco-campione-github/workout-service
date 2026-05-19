@@ -16,22 +16,27 @@ import org.springframework.web.bind.annotation.RestController
 import org.workout.ws.api.model.ApiExerciseRequest
 import org.workout.ws.api.model.CreateUserRequest
 import org.workout.ws.api.model.CreateWorkoutPlanRequest
+import org.workout.ws.api.model.CreateWorkoutSessionRequest
 import org.workout.ws.api.model.ExerciseResponse
 import org.workout.ws.api.model.UpdateUserRequest
 import org.workout.ws.api.model.UpdateWorkoutPlanRequest
+import org.workout.ws.api.model.UpdateWorkoutSessionRequest
 import org.workout.ws.api.model.UserResponse
 import org.workout.ws.api.model.WorkoutPlanResponse
+import org.workout.ws.api.model.WorkoutSessionResponse
 import org.workout.ws.api.model.toResponse
 import org.workout.ws.exercises.ExerciseService
 import org.workout.ws.plan.WorkoutPlanService
+import org.workout.ws.session.WorkoutSessionService
 import org.workout.ws.user.UserService
 
 @RestController
-@RequestMapping("/workout")
+@RequestMapping("/v1")
 class RestGateway(
     private val exerciseService: ExerciseService,
     private val userService: UserService,
     private val workoutPlanService: WorkoutPlanService,
+    private val workoutSessionService: WorkoutSessionService,
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -43,7 +48,7 @@ class RestGateway(
 
     @GetMapping("exercise")
     fun getAllExercises(@RequestParam(required = false) limit: Int?): List<ExerciseResponse> {
-        logger.info { "Received GET request for all exercises" }
+        logger.info { "Received GET request for all exercises with limit: $limit" }
         return exerciseService.getAllExercises(limit).map { it.toResponse() }
     }
 
@@ -62,7 +67,7 @@ class RestGateway(
 
     @GetMapping("plan")
     fun getAllPlans(@RequestParam(required = false) limit: Int?): List<WorkoutPlanResponse> {
-        logger.info { "Received GET request for all workout plans" }
+        logger.info { "Received GET request for all workout plans with limit: $limit" }
         return workoutPlanService.getAllWorkoutPlans(limit).map { it.toResponse() }
     }
 
@@ -116,5 +121,58 @@ class RestGateway(
     fun deleteUser(@PathVariable id: String) {
         logger.info { "Received DELETE request for user with id: $id" }
         userService.deleteUser(id)
+    }
+
+    @PostMapping("session")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createWorkoutSession(@Valid @RequestBody req: CreateWorkoutSessionRequest): WorkoutSessionResponse {
+        logger.info { "Received POST request to create a new workout session for user: ${req.userId}" }
+        return workoutSessionService.createWorkoutSession(req).toResponse()
+    }
+
+    @GetMapping("session/{id}")
+    fun getWorkoutSessionById(@PathVariable id: String): WorkoutSessionResponse? {
+        logger.info { "Received GET request for workout session with id: $id" }
+        return workoutSessionService.getWorkoutSessionById(id)?.toResponse()
+    }
+
+    @GetMapping("session")
+    fun getAllWorkoutSessions(@RequestParam(required = false) limit: Int?): List<WorkoutSessionResponse> {
+        logger.info { "Received GET request for all workout sessions with limit: $limit" }
+        return workoutSessionService.getAllWorkoutSessions(limit).map { it.toResponse() }
+    }
+
+    @GetMapping("session/user/{userId}")
+    fun getWorkoutSessionsByUserId(
+        @PathVariable userId: String,
+        @RequestParam(required = false) limit: Int?
+    ): List<WorkoutSessionResponse> {
+        logger.info { "Received GET request for workout sessions of user: $userId with limit: $limit" }
+        return workoutSessionService.getWorkoutSessionsByUserId(userId, limit).map { it.toResponse() }
+    }
+
+    @GetMapping("session/plan/{workoutPlanId}")
+    fun getWorkoutSessionsByPlanId(
+        @PathVariable workoutPlanId: String,
+        @RequestParam(required = false) limit: Int?
+    ): List<WorkoutSessionResponse> {
+        logger.info { "Received GET request for workout sessions of plan: $workoutPlanId with limit: $limit" }
+        return workoutSessionService.getWorkoutSessionsByWorkoutPlanId(workoutPlanId, limit).map { it.toResponse() }
+    }
+
+    @PatchMapping("session/{id}")
+    fun updateWorkoutSession(
+        @PathVariable id: String,
+        @Valid @RequestBody req: UpdateWorkoutSessionRequest
+    ): WorkoutSessionResponse {
+        logger.info { "Received PATCH request to update workout session: $id" }
+        return workoutSessionService.updateWorkoutSession(id, req).toResponse()
+    }
+
+    @DeleteMapping("session/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteWorkoutSession(@PathVariable id: String) {
+        logger.info { "Received DELETE request for workout session: $id" }
+        workoutSessionService.deleteWorkoutSession(id)
     }
 }
